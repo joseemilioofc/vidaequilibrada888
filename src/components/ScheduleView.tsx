@@ -2,21 +2,35 @@ import { useState } from 'react';
 import { ProfessionalTemplate, DaySchedule, TimeBlock, calculateDayBalance, getCategoryLabel } from '@/types/schedule';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import BalanceIndicator from './BalanceIndicator';
 import { getRandomQuote } from '@/data/templates';
-import { Clock, Briefcase, Heart, Moon } from 'lucide-react';
+import { Clock, Briefcase, Heart, Moon, Plus, Edit3 } from 'lucide-react';
 
 interface ScheduleViewProps {
   template: ProfessionalTemplate;
+  onBlockEdit?: (block: TimeBlock) => void;
+  onAddBlock?: () => void;
+  selectedDay?: number;
+  onDayChange?: (day: number) => void;
 }
 
 const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-const ScheduleView = ({ template }: ScheduleViewProps) => {
+const ScheduleView = ({ 
+  template, 
+  onBlockEdit, 
+  onAddBlock,
+  selectedDay: externalSelectedDay,
+  onDayChange 
+}: ScheduleViewProps) => {
   const today = new Date().getDay();
-  const [selectedDay, setSelectedDay] = useState<number>(today);
+  const [internalSelectedDay, setInternalSelectedDay] = useState<number>(today);
   const [quote] = useState(getRandomQuote());
+
+  const selectedDay = externalSelectedDay ?? internalSelectedDay;
+  const handleDayChange = onDayChange ?? setInternalSelectedDay;
 
   const currentDaySchedule = template.weeklySchedule.days.find(d => d.dayOfWeek === selectedDay);
   const balance = currentDaySchedule ? calculateDayBalance(currentDaySchedule) : null;
@@ -33,7 +47,7 @@ const ScheduleView = ({ template }: ScheduleViewProps) => {
         {template.weeklySchedule.days.map((day) => (
           <button
             key={day.dayOfWeek}
-            onClick={() => setSelectedDay(day.dayOfWeek)}
+            onClick={() => handleDayChange(day.dayOfWeek)}
             className={`flex-shrink-0 flex flex-col items-center gap-1 px-4 py-3 rounded-xl transition-all duration-200 ${
               selectedDay === day.dayOfWeek
                 ? 'bg-primary text-primary-foreground shadow-glow-work'
@@ -68,12 +82,23 @@ const ScheduleView = ({ template }: ScheduleViewProps) => {
                   <Badge variant="secondary">{currentDaySchedule.theme}</Badge>
                 )}
               </div>
+              {onAddBlock && (
+                <Button variant="outline" size="sm" onClick={onAddBlock}>
+                  <Plus className="w-4 h-4 mr-1" />
+                  Adicionar
+                </Button>
+              )}
             </div>
 
             <ScrollArea className="h-[500px]">
               <div className="p-4 space-y-2">
                 {currentDaySchedule?.blocks.map((block, index) => (
-                  <TimeBlockItem key={block.id} block={block} index={index} />
+                  <TimeBlockItem 
+                    key={block.id} 
+                    block={block} 
+                    index={index}
+                    onEdit={onBlockEdit}
+                  />
                 ))}
               </div>
             </ScrollArea>
@@ -148,9 +173,10 @@ const ScheduleView = ({ template }: ScheduleViewProps) => {
 interface TimeBlockItemProps {
   block: TimeBlock;
   index: number;
+  onEdit?: (block: TimeBlock) => void;
 }
 
-const TimeBlockItem = ({ block, index }: TimeBlockItemProps) => {
+const TimeBlockItem = ({ block, index, onEdit }: TimeBlockItemProps) => {
   const categoryStyles = {
     work: 'bg-work/10 border-l-work hover:bg-work/15',
     leisure: 'bg-leisure/10 border-l-leisure hover:bg-leisure/15',
@@ -165,8 +191,9 @@ const TimeBlockItem = ({ block, index }: TimeBlockItemProps) => {
 
   return (
     <div 
-      className={`flex gap-4 p-4 rounded-lg border-l-4 transition-all duration-200 cursor-pointer ${categoryStyles[block.category]}`}
+      className={`group flex gap-4 p-4 rounded-lg border-l-4 transition-all duration-200 cursor-pointer ${categoryStyles[block.category]}`}
       style={{ animationDelay: `${index * 50}ms` }}
+      onClick={() => onEdit?.(block)}
     >
       {/* Time */}
       <div className="flex-shrink-0 w-24">
@@ -185,6 +212,13 @@ const TimeBlockItem = ({ block, index }: TimeBlockItemProps) => {
           <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{block.description}</p>
         )}
       </div>
+
+      {/* Edit indicator */}
+      {onEdit && (
+        <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Edit3 className="w-4 h-4 text-muted-foreground" />
+        </div>
+      )}
 
       {/* Category Badge */}
       <Badge 
