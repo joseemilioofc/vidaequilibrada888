@@ -14,7 +14,180 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      daily_progress: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          leisure_hours: number | null
+          notes: string | null
+          sleep_hours: number | null
+          tasks_completed: number | null
+          tasks_total: number | null
+          updated_at: string
+          user_id: string
+          work_hours: number | null
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          leisure_hours?: number | null
+          notes?: string | null
+          sleep_hours?: number | null
+          tasks_completed?: number | null
+          tasks_total?: number | null
+          updated_at?: string
+          user_id: string
+          work_hours?: number | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          leisure_hours?: number | null
+          notes?: string | null
+          sleep_hours?: number | null
+          tasks_completed?: number | null
+          tasks_total?: number | null
+          updated_at?: string
+          user_id?: string
+          work_hours?: number | null
+        }
+        Relationships: []
+      }
+      goals: {
+        Row: {
+          completed: boolean | null
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          id: string
+          period: string
+          template_id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          period: string
+          template_id: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          period?: string
+          template_id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read: boolean | null
+          scheduled_for: string | null
+          title: string
+          type: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean | null
+          scheduled_for?: string | null
+          title: string
+          type?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean | null
+          scheduled_for?: string | null
+          title?: string
+          type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          selected_template: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          selected_template?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          selected_template?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      schedules: {
+        Row: {
+          blocks: Json
+          created_at: string
+          day_of_week: string
+          id: string
+          template_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          blocks?: Json
+          created_at?: string
+          day_of_week: string
+          id?: string
+          template_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          blocks?: Json
+          created_at?: string
+          day_of_week?: string
+          id?: string
+          template_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
