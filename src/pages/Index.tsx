@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ProfessionalTemplate, TimeBlock } from '@/types/schedule';
 import { professionalTemplates } from '@/data/templates';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/hooks/useTheme';
 import { supabase } from '@/integrations/supabase/client';
 import TemplateCard from '@/components/TemplateCard';
 import BalanceIndicator from '@/components/BalanceIndicator';
@@ -12,9 +13,14 @@ import Header from '@/components/Header';
 import BlockEditor from '@/components/BlockEditor';
 import ProgressTracker from '@/components/ProgressTracker';
 import { useToast } from '@/hooks/use-toast';
+import { exportUserData } from '@/utils/exportData';
+import { Button } from '@/components/ui/button';
+import { Moon, Sun } from 'lucide-react';
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -167,6 +173,18 @@ const Index = () => {
         <div className="relative z-10 container mx-auto px-4 py-12 max-w-6xl">
           {/* Hero Section */}
           <header className="text-center mb-16 animate-fade-in">
+            {/* Theme Toggle for Landing */}
+            <div className="absolute top-4 right-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                className="rounded-full"
+              >
+                {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+              </Button>
+            </div>
+
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
               Sistema 8-8-8 de Vida Equilibrada
@@ -235,6 +253,7 @@ const Index = () => {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onOpenProgress={() => setIsProgressOpen(true)}
+        onExportData={() => exportUserData(user, selectedTemplate)}
       />
       
       <main className="container mx-auto px-4 py-6 max-w-7xl">
