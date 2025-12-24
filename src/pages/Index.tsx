@@ -12,6 +12,7 @@ import GoalsPanel from '@/components/GoalsPanel';
 import Header from '@/components/Header';
 import BlockEditor from '@/components/BlockEditor';
 import ProgressTracker from '@/components/ProgressTracker';
+import Breadcrumbs from '@/components/Breadcrumbs';
 import { useToast } from '@/hooks/use-toast';
 import { exportUserData } from '@/utils/exportData';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,6 @@ import { Moon, Sun } from 'lucide-react';
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const navigate = useNavigate();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -64,6 +64,14 @@ const Index = () => {
         .from('profiles')
         .update({ selected_template: template.id })
         .eq('user_id', user.id);
+
+      // Log activity
+      await supabase.from('activity_logs').insert({
+        user_id: user.id,
+        action: 'selected_template',
+        entity_type: 'template',
+        metadata: { template_id: template.id, template_name: template.name }
+      });
 
       toast({
         title: 'Modelo selecionado!',
@@ -174,7 +182,7 @@ const Index = () => {
           {/* Hero Section */}
           <header className="text-center mb-16 animate-fade-in">
             {/* Theme Toggle for Landing */}
-            <div className="absolute top-4 right-4">
+            <div className="absolute top-4 right-4 flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="icon"
@@ -257,6 +265,14 @@ const Index = () => {
       />
       
       <main className="container mx-auto px-4 py-6 max-w-7xl">
+        <Breadcrumbs 
+          items={[
+            { label: 'Início', href: '/' },
+            { label: selectedTemplate.name },
+            { label: activeTab === 'schedule' ? 'Cronograma' : 'Metas' }
+          ]} 
+        />
+        
         {activeTab === 'schedule' ? (
           <ScheduleView 
             template={selectedTemplate}

@@ -1,7 +1,10 @@
+import { useNavigate } from 'react-router-dom';
 import { ProfessionalTemplate } from '@/types/schedule';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calendar, Target, BarChart3, Moon, Sun, Download } from 'lucide-react';
+import { ArrowLeft, Calendar, Target, BarChart3, Moon, Sun, Download, LayoutDashboard, ShieldCheck } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
+import { useUserRole } from '@/hooks/useUserRole';
+import MobileNav from './MobileNav';
 
 interface HeaderProps {
   template: ProfessionalTemplate;
@@ -13,7 +16,9 @@ interface HeaderProps {
 }
 
 const Header = ({ template, onBack, activeTab, onTabChange, onOpenProgress, onExportData }: HeaderProps) => {
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { isAdmin } = useUserRole();
 
   return (
     <header className="sticky top-0 z-50 glass border-b border-border/50">
@@ -21,11 +26,13 @@ const Header = ({ template, onBack, activeTab, onTabChange, onOpenProgress, onEx
         <div className="flex items-center justify-between">
           {/* Left: Back button and title */}
           <div className="flex items-center gap-4">
+            <MobileNav isAdmin={isAdmin} />
+            
             <Button 
               variant="ghost" 
               size="icon"
               onClick={onBack}
-              className="hover:bg-secondary"
+              className="hover:bg-secondary hidden md:flex"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
@@ -60,16 +67,40 @@ const Header = ({ template, onBack, activeTab, onTabChange, onOpenProgress, onEx
               )}
             </Button>
 
+            {/* Dashboard Link */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/dashboard')}
+              className="rounded-full hidden sm:flex"
+              title="Dashboard"
+            >
+              <LayoutDashboard className="w-5 h-5" />
+            </Button>
+
+            {/* Admin Link */}
+            {isAdmin && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate('/admin')}
+                className="rounded-full hidden sm:flex"
+                title="Administração"
+              >
+                <ShieldCheck className="w-5 h-5" />
+              </Button>
+            )}
+
             {onExportData && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={onExportData}
-                className="gap-2"
+                className="gap-2 hidden sm:flex"
                 title="Exportar dados"
               >
                 <Download className="w-4 h-4" />
-                <span className="hidden sm:inline">Exportar</span>
+                <span className="hidden lg:inline">Exportar</span>
               </Button>
             )}
 
@@ -85,7 +116,7 @@ const Header = ({ template, onBack, activeTab, onTabChange, onOpenProgress, onEx
               </Button>
             )}
             
-            <div className="flex items-center gap-1 bg-secondary/50 rounded-lg p-1">
+            <div className="hidden sm:flex items-center gap-1 bg-secondary/50 rounded-lg p-1">
               <Button
                 variant={activeTab === 'schedule' ? 'default' : 'ghost'}
                 size="sm"
@@ -93,7 +124,7 @@ const Header = ({ template, onBack, activeTab, onTabChange, onOpenProgress, onEx
                 className="gap-2"
               >
                 <Calendar className="w-4 h-4" />
-                <span className="hidden sm:inline">Cronograma</span>
+                <span className="hidden md:inline">Cronograma</span>
               </Button>
               <Button
                 variant={activeTab === 'goals' ? 'default' : 'ghost'}
@@ -102,7 +133,7 @@ const Header = ({ template, onBack, activeTab, onTabChange, onOpenProgress, onEx
                 className="gap-2"
               >
                 <Target className="w-4 h-4" />
-                <span className="hidden sm:inline">Metas</span>
+                <span className="hidden md:inline">Metas</span>
               </Button>
             </div>
           </div>
