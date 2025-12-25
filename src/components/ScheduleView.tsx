@@ -5,8 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import BalanceIndicator from './BalanceIndicator';
+import ActivityTimer from './ActivityTimer';
 import { getRandomQuote } from '@/data/templates';
-import { Clock, Briefcase, Heart, Moon, Plus, Edit3 } from 'lucide-react';
+import { Clock, Briefcase, Heart, Moon, Plus, Edit3, Play, Timer } from 'lucide-react';
 
 interface ScheduleViewProps {
   template: ProfessionalTemplate;
@@ -28,6 +29,7 @@ const ScheduleView = ({
   const today = new Date().getDay();
   const [internalSelectedDay, setInternalSelectedDay] = useState<number>(today);
   const [quote] = useState(getRandomQuote());
+  const [activeBlock, setActiveBlock] = useState<TimeBlock | null>(null);
 
   const selectedDay = externalSelectedDay ?? internalSelectedDay;
   const handleDayChange = onDayChange ?? setInternalSelectedDay;
@@ -35,8 +37,30 @@ const ScheduleView = ({
   const currentDaySchedule = template.weeklySchedule.days.find(d => d.dayOfWeek === selectedDay);
   const balance = currentDaySchedule ? calculateDayBalance(currentDaySchedule) : null;
 
+  const handleStartActivity = (block: TimeBlock) => {
+    setActiveBlock(block);
+  };
+
+  const handleStopActivity = () => {
+    setActiveBlock(null);
+  };
+
+  const handleCompleteActivity = (block: TimeBlock) => {
+    setActiveBlock(null);
+    // Could emit event or show celebration here
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Activity Timer - Shows when an activity is active */}
+      {activeBlock && (
+        <ActivityTimer 
+          block={activeBlock}
+          onStop={handleStopActivity}
+          onComplete={handleCompleteActivity}
+        />
+      )}
+
       {/* Motivational Quote */}
       <Card className="bg-gradient-to-r from-primary/5 via-leisure/5 to-sleep/5 border-border/30 p-4">
         <p className="text-center text-muted-foreground italic">"{quote}"</p>
@@ -98,6 +122,8 @@ const ScheduleView = ({
                     block={block} 
                     index={index}
                     onEdit={onBlockEdit}
+                    onStart={handleStartActivity}
+                    isActive={activeBlock?.id === block.id}
                   />
                 ))}
               </div>
@@ -174,9 +200,11 @@ interface TimeBlockItemProps {
   block: TimeBlock;
   index: number;
   onEdit?: (block: TimeBlock) => void;
+  onStart?: (block: TimeBlock) => void;
+  isActive?: boolean;
 }
 
-const TimeBlockItem = ({ block, index, onEdit }: TimeBlockItemProps) => {
+const TimeBlockItem = ({ block, index, onEdit, onStart, isActive }: TimeBlockItemProps) => {
   const categoryStyles = {
     work: 'bg-work/10 border-l-work hover:bg-work/15',
     leisure: 'bg-leisure/10 border-l-leisure hover:bg-leisure/15',
@@ -189,12 +217,34 @@ const TimeBlockItem = ({ block, index, onEdit }: TimeBlockItemProps) => {
     sleep: <Moon className="w-4 h-4 text-sleep" />,
   };
 
+  const handleStartClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onStart?.(block);
+  };
+
   return (
     <div 
-      className={`group flex gap-4 p-4 rounded-lg border-l-4 transition-all duration-200 cursor-pointer ${categoryStyles[block.category]}`}
+      className={`group flex gap-4 p-4 rounded-lg border-l-4 transition-all duration-200 cursor-pointer ${categoryStyles[block.category]} ${isActive ? 'ring-2 ring-primary ring-offset-2' : ''}`}
       style={{ animationDelay: `${index * 50}ms` }}
       onClick={() => onEdit?.(block)}
     >
+      {/* Start Button */}
+      {onStart && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className={`flex-shrink-0 h-10 w-10 rounded-full ${
+            isActive 
+              ? 'bg-primary text-primary-foreground' 
+              : 'bg-secondary hover:bg-primary hover:text-primary-foreground'
+          }`}
+          onClick={handleStartClick}
+          disabled={isActive}
+        >
+          {isActive ? <Timer className="w-4 h-4 animate-pulse" /> : <Play className="w-4 h-4" />}
+        </Button>
+      )}
+
       {/* Time */}
       <div className="flex-shrink-0 w-24">
         <span className="text-sm font-medium text-foreground">{block.startTime}</span>
@@ -207,6 +257,11 @@ const TimeBlockItem = ({ block, index, onEdit }: TimeBlockItemProps) => {
         <div className="flex items-center gap-2">
           {categoryIcons[block.category]}
           <h4 className="font-medium text-foreground truncate">{block.title}</h4>
+          {isActive && (
+            <Badge variant="default" className="bg-primary animate-pulse">
+              Em andamento
+            </Badge>
+          )}
         </div>
         {block.description && (
           <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{block.description}</p>
@@ -214,7 +269,7 @@ const TimeBlockItem = ({ block, index, onEdit }: TimeBlockItemProps) => {
       </div>
 
       {/* Edit indicator */}
-      {onEdit && (
+      {onEdit && !isActive && (
         <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
           <Edit3 className="w-4 h-4 text-muted-foreground" />
         </div>
