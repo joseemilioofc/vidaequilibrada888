@@ -1,10 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import { ProfessionalTemplate } from '@/types/schedule';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calendar, Target, BarChart3, Moon, Sun, Download, LayoutDashboard, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Calendar, Target, BarChart3, Moon, Sun, Download, LayoutDashboard, ShieldCheck, User } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { useUserRole } from '@/hooks/useUserRole';
 import MobileNav from './MobileNav';
+import NotificationsPanel from './NotificationsPanel';
+import NotificationSettings from './NotificationSettings';
 
 interface HeaderProps {
   template: ProfessionalTemplate;
@@ -65,6 +67,23 @@ const Header = ({ template, onBack, activeTab, onTabChange, onOpenProgress, onEx
               ) : (
                 <Sun className="w-5 h-5" />
               )}
+            </Button>
+
+            {/* Notifications */}
+            <NotificationsPanel />
+            
+            {/* Notification Settings */}
+            <NotificationSettings />
+
+            {/* Profile Link */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/profile')}
+              className="rounded-full hidden sm:flex"
+              title="Meu Perfil"
+            >
+              <User className="w-5 h-5" />
             </Button>
 
             {/* Dashboard Link */}
