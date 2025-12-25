@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import TemplateCard from '@/components/TemplateCard';
 import BalanceIndicator from '@/components/BalanceIndicator';
 import ScheduleView from '@/components/ScheduleView';
-import GoalsPanel from '@/components/GoalsPanel';
+import GoalsPanelEnhanced from '@/components/GoalsPanelEnhanced';
 import Header from '@/components/Header';
 import BlockEditor from '@/components/BlockEditor';
 import ProgressTracker from '@/components/ProgressTracker';
@@ -340,7 +340,7 @@ const Index = () => {
             onDayChange={setSelectedDay}
           />
         ) : (
-          <GoalsPanel goals={selectedTemplate.goals} />
+          <GoalsPanelEnhanced goals={selectedTemplate.goals} templateId={selectedTemplate.id} />
         )}
       </main>
 
