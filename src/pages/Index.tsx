@@ -13,10 +13,15 @@ import Header from '@/components/Header';
 import BlockEditor from '@/components/BlockEditor';
 import ProgressTracker from '@/components/ProgressTracker';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import ScheduleSelector from '@/components/ScheduleSelector';
+import GoalGenerator from '@/components/GoalGenerator';
 import { useToast } from '@/hooks/use-toast';
 import { exportUserData } from '@/utils/exportData';
 import { Button } from '@/components/ui/button';
 import { Moon, Sun } from 'lucide-react';
+import appIcon from '@/assets/app-icon.png';
+import heroDecoration from '@/assets/hero-decoration.png';
+import balanceIllustration from '@/assets/balance-illustration.png';
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
@@ -139,6 +144,24 @@ const Index = () => {
     });
   };
 
+  const handleBlocksReorder = (blocks: TimeBlock[]) => {
+    if (!selectedTemplate) return;
+
+    const updatedTemplate = { ...selectedTemplate };
+    const dayIndex = updatedTemplate.weeklySchedule.days.findIndex(d => d.dayOfWeek === selectedDay);
+    
+    if (dayIndex !== -1) {
+      updatedTemplate.weeklySchedule.days[dayIndex].blocks = blocks;
+      setSelectedTemplate(updatedTemplate);
+      saveScheduleToDatabase(dayIndex, blocks);
+      
+      toast({
+        title: 'Cronograma atualizado!',
+        description: 'Os blocos foram reorganizados.',
+      });
+    }
+  };
+
   const saveScheduleToDatabase = async (dayIndex: number, blocks: TimeBlock[]) => {
     if (!user || !selectedTemplate) return;
 
@@ -161,6 +184,13 @@ const Index = () => {
     setIsEditorOpen(true);
   };
 
+  const handleGoalsGenerated = () => {
+    toast({
+      title: 'Metas atualizadas!',
+      description: 'Vá para a aba de metas para visualizar.',
+    });
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -172,10 +202,16 @@ const Index = () => {
   if (!selectedTemplate) {
     return (
       <div className="min-h-screen bg-background">
+        {/* Background Decorations */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-work/5 rounded-full blur-3xl" />
           <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-leisure/5 rounded-full blur-3xl" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-sleep/5 rounded-full blur-3xl" />
+          <img 
+            src={heroDecoration} 
+            alt="" 
+            className="absolute top-0 left-0 w-full h-64 object-cover opacity-10"
+          />
         </div>
 
         <div className="relative z-10 container mx-auto px-4 py-12 max-w-6xl">
@@ -191,6 +227,11 @@ const Index = () => {
               >
                 {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
               </Button>
+            </div>
+
+            {/* App Icon */}
+            <div className="flex justify-center mb-6">
+              <img src={appIcon} alt="8-8-8 App" className="w-20 h-20 rounded-2xl shadow-lg" />
             </div>
 
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
@@ -227,8 +268,13 @@ const Index = () => {
             )}
           </header>
 
-          {/* Balance Preview */}
-          <div className="flex justify-center mb-16 animate-fade-in" style={{ animationDelay: '100ms' }}>
+          {/* Balance Preview with Illustration */}
+          <div className="flex flex-col md:flex-row items-center justify-center gap-8 mb-16 animate-fade-in" style={{ animationDelay: '100ms' }}>
+            <img 
+              src={balanceIllustration} 
+              alt="Equilíbrio de vida" 
+              className="w-48 h-48 md:w-64 md:h-64 rounded-2xl shadow-lg object-cover"
+            />
             <BalanceIndicator workHours={8} leisureHours={8} sleepHours={8} />
           </div>
 
@@ -272,6 +318,18 @@ const Index = () => {
             { label: activeTab === 'schedule' ? 'Cronograma' : 'Metas' }
           ]} 
         />
+        
+        {/* Action Buttons */}
+        <div className="flex flex-wrap gap-3 my-4">
+          <ScheduleSelector 
+            currentTemplate={selectedTemplate}
+            onSelectTemplate={handleSelectTemplate}
+          />
+          <GoalGenerator 
+            template={selectedTemplate}
+            onGoalsGenerated={handleGoalsGenerated}
+          />
+        </div>
         
         {activeTab === 'schedule' ? (
           <ScheduleView 

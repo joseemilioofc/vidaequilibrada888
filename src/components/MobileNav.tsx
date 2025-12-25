@@ -37,6 +37,7 @@ const MobileNav = ({ isAdmin = false }: MobileNavProps) => {
   const navItems = [
     { label: 'Início', href: '/', icon: Home },
     { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { label: 'Perfil', href: '/profile', icon: Settings },
   ];
 
   if (isAdmin) {
